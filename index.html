@@ -735,35 +735,34 @@
        MUSIC PLAYER
     ============================================================ */
     const audio = document.getElementById('bg-audio');
-    const musicBtn = document.getElementById('music-btn');
-    let isPlaying = false;
+    let hasPlayed = false;
 
-    function tryAutoplay() {
-      audio.volume = 0.45;
-      audio.play().then(() => {
-        isPlaying = true;
-        musicBtn.textContent = '🎵';
-        musicBtn.classList.add('playing');
-      }).catch(() => {
-        // Autoplay diblokir browser — tunggu interaksi user
-        isPlaying = false;
-        musicBtn.textContent = '▶️';
-      });
+    function startAudio() {
+      if (!hasPlayed) {
+        audio.volume = 0;
+
+        audio.play().then(() => {
+          hasPlayed = true;
+
+          // 🎵 fade in biar smooth
+          let vol = 0;
+          const fade = setInterval(() => {
+            if (vol < 0.45) {
+              vol += 0.02;
+              audio.volume = vol;
+            } else {
+              clearInterval(fade);
+            }
+          }, 100);
+        }).catch(err => {
+          console.log("Autoplay gagal:", err);
+        });
+      }
     }
 
-    musicBtn.addEventListener('click', () => {
-      if (isPlaying) {
-        audio.pause();
-        isPlaying = false;
-        musicBtn.textContent = '▶️';
-        musicBtn.classList.remove('playing');
-      } else {
-        audio.play();
-        isPlaying = true;
-        musicBtn.textContent = '🎵';
-        musicBtn.classList.add('playing');
-      }
-    });
+    // trigger semua jenis interaksi (HP + laptop)
+    document.addEventListener('click', startAudio, { once: true });
+    document.addEventListener('touchstart', startAudio, { once: true });
 
     /* ============================================================
        TYPING ANIMATION
